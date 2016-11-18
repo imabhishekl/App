@@ -1,0 +1,24 @@
+#!/bin/sh
+
+# Stop and Remove the existing docker instances 
+docker stop simple_app
+docker rmi localhost:5000/app:current_build
+docker rmi localhost:5000/app:latest_build
+
+# Build the base images with current made changes
+docker build -t simple_app
+
+# Tag the newly created image
+docker tag simple_app localhost:5000/app:latest_build
+
+# Push the latest image to the running registery server
+docker push localhost:5000/app:latest_build
+
+# Get the pulled image
+docker pull localhost:5000/app:latest_build
+
+# Tag it to current so that latest and current are different
+docker tag localhost:5000/app:latest_build localhost:5000/app:current_build
+
+# Run the docker images pulled which contain the latest deployed code
+docker run -p 8070:8080 -d --name simple_app localhost:5000/app:current_build
